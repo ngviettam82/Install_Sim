@@ -111,7 +111,7 @@ if %errorlevel% equ 0 (
 )
 
 echo Installing Ubuntu 22.04...
-wsl --install -d Ubuntu-22.04 --no-launch
+wsl --install -d Ubuntu-22.04 --web-download --no-launch
 if %errorlevel% neq 0 (
     echo ERROR: Failed to install Ubuntu 22.04.
     echo.

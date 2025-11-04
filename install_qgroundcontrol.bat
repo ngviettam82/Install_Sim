@@ -8,7 +8,7 @@ echo.
 
 REM Set installation directory
 set "INSTALL_DIR=%~dp0..\QGroundControl"
-set "QGC_URL=https://github.com/mavlink/qgroundcontrol/releases/download/v4.3.0/QGroundControl-installer.exe"
+set "QGC_URL=https://github.com/mavlink/qgroundcontrol/releases/download/v5.0.8/QGroundControl-installer.exe"
 set "QGC_INSTALLER=%TEMP%\QGroundControl-installer.exe"
 
 REM Check if QGroundControl is already installed
