@@ -21,14 +21,16 @@ if ([string]::IsNullOrEmpty($scriptDir)) {
 }
 $projectDir = Split-Path -Parent $scriptDir
 $mapsFolder = Join-Path $projectDir "Maps"
+$tutorialMapsFolder = Join-Path $projectDir "Tutorial Maps"
 
 Write-Host "[*] Project Directory: $projectDir" -ForegroundColor Yellow
 Write-Host "[*] Maps Directory: $mapsFolder" -ForegroundColor Yellow
+Write-Host "[*] Tutorial Maps Directory: $tutorialMapsFolder" -ForegroundColor Yellow
 Write-Host ""
 
-# Check if Maps folder exists
-if (-not (Test-Path $mapsFolder)) {
-    Write-Host "ERROR: Maps folder not found at: $mapsFolder" -ForegroundColor Red
+# Check if at least one folder exists
+if ((-not (Test-Path $mapsFolder)) -and (-not (Test-Path $tutorialMapsFolder))) {
+    Write-Host "ERROR: Neither Maps nor Tutorial Maps folder found!" -ForegroundColor Red
     if ($Parameter -eq "") {
         pause
     }
@@ -52,18 +54,26 @@ if ($wslIp) {
 }
 Write-Host ""
 
-# Get all folders in Maps directory
-$mapFolders = Get-ChildItem -Path $mapsFolder -Directory
+# Get all folders in Maps and Tutorial Maps directories
+$mapFolders = @()
+
+if (Test-Path $mapsFolder) {
+    $mapFolders += Get-ChildItem -Path $mapsFolder -Directory
+}
+
+if (Test-Path $tutorialMapsFolder) {
+    $mapFolders += Get-ChildItem -Path $tutorialMapsFolder -Directory
+}
 
 if ($mapFolders.Count -eq 0) {
-    Write-Host "WARNING: No folders found in Maps directory" -ForegroundColor Yellow
+    Write-Host "WARNING: No folders found in Maps or Tutorial Maps directories" -ForegroundColor Yellow
     if ($Parameter -eq "") {
         pause
     }
     exit 0
 }
 
-Write-Host "[*] Found $($mapFolders.Count) map folder(s)" -ForegroundColor Yellow
+Write-Host "[*] Found $($mapFolders.Count) total map folder(s)" -ForegroundColor Yellow
 Write-Host ""
 
 # Process each folder
