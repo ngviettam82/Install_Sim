@@ -23,7 +23,7 @@ if %errorLevel% neq 0 (
     exit /b 1
 )
 
-echo [1/4] Installing WSL with Ubuntu 22.04...
+echo [1/5] Installing WSL with Ubuntu 22.04...
 call "%~dp0install_wsl.bat" auto
 if %errorLevel% neq 0 (
     echo ERROR: WSL installation failed!
@@ -34,7 +34,7 @@ echo WSL installation completed successfully!
 echo.
 
 echo.
-echo [2/4] Setting up PX4 Autopilot in WSL...
+echo [2/5] Setting up PX4 Autopilot in WSL...
 call "%~dp0setup_px4_in_wsl.bat" auto
 if %errorLevel% neq 0 (
     echo ERROR: PX4 setup failed!
@@ -45,7 +45,7 @@ echo PX4 setup completed successfully!
 echo.
 
 echo.
-echo [3/4] Building PX4 SITL...
+echo [3/5] Building PX4 SITL...
 call "%~dp0build_px4.bat" auto
 if %errorLevel% neq 0 (
     echo ERROR: PX4 build failed!
@@ -56,7 +56,7 @@ echo PX4 build completed successfully!
 echo.
 
 echo.
-echo [4/4] Installing QGroundControl...
+echo [4/5] Installing QGroundControl...
 call "%~dp0install_qgroundcontrol.bat" auto
 if %errorLevel% neq 0 (
     echo ERROR: QGroundControl installation failed!
@@ -64,6 +64,17 @@ if %errorLevel% neq 0 (
     exit /b 1
 )
 echo QGroundControl installation completed successfully!
+echo.
+
+echo.
+echo [5/5] Configuring AirSim Settings...
+call "%~dp0setup_settings.bat" auto
+if %errorLevel% neq 0 (
+    echo ERROR: Settings configuration failed!
+    pause
+    exit /b 1
+)
+echo Settings configuration completed successfully!
 echo.
 
 echo.
