@@ -101,6 +101,8 @@ $bashScriptLines = @(
     'if [ -f "$RC_FILE" ]; then',
     '    sed -i "14s/$/ -p/" "$RC_FILE"',
     '    echo "Modified px4-rc.mavlink file (added -p flag to line 14)"',
+    '    echo "mavlink start -x -u 14600 -o 14560 -f -p -t WSLIP_PLACEHOLDER" >> "$RC_FILE"',
+    '    echo "Added mavlink start command to end of px4-rc.mavlink"',
     'else',
     '    echo "Warning: px4-rc.mavlink file not found"',
     'fi',
