@@ -165,6 +165,15 @@ if %errorlevel% neq 0 (
     timeout /t 2 /nobreak >nul
 )
 
+echo Setting Ubuntu-22.04 as default WSL distribution...
+wsl --set-default Ubuntu-22.04
+if %errorlevel% equ 0 (
+    echo Ubuntu-22.04 is now set as the default WSL distribution.
+) else (
+    echo WARNING: Failed to set Ubuntu-22.04 as default distribution.
+)
+echo.
+
 echo.
 echo ============================================================================
 echo WSL Installation Complete!
