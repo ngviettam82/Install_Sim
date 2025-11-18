@@ -75,9 +75,18 @@ if %errorlevel% equ 0 (
     goto InstallUbuntu
 )
 
-echo WSL features enabled but not yet functional. Attempting to install Ubuntu...
-echo If this fails, a restart will be required.
+echo A system restart is required to complete the feature installation.
 echo.
+set /p RESTART="Do you want to restart now? (Y/N): "
+if /i "%RESTART%"=="Y" (
+    echo Restarting system in 10 seconds...
+    shutdown /r /t 10 /c "Restarting to complete WSL2 installation"
+    exit /b 0
+) else (
+    echo Please restart your computer manually and run this script again.
+    pause
+    exit /b 0
+)
 
 :InstallUbuntu
 echo Setting WSL 2 as the default version...
@@ -106,24 +115,13 @@ wsl --install -d Ubuntu-22.04 --web-download --no-launch
 if %errorlevel% neq 0 (
     echo ERROR: Failed to install Ubuntu 22.04.
     echo.
-    echo This may be because WSL features require a system restart.
+    echo Troubleshooting tips:
+    echo 1. Make sure you have restarted after enabling WSL features
+    echo 2. Ensure you have an internet connection
+    echo 3. Try running: wsl --update
     echo.
-    set /p RESTART="Do you want to restart now? (Y/N): "
-    if /i "%RESTART%"=="Y" (
-        echo Restarting system in 10 seconds...
-        shutdown /r /t 10 /c "Restarting to complete WSL2 installation"
-        exit /b 0
-    ) else (
-        echo Please restart your computer manually and run this script again.
-        echo.
-        echo Troubleshooting tips:
-        echo 1. Ensure you have restarted after enabling WSL features
-        echo 2. Ensure you have an internet connection
-        echo 3. Try running: wsl --update
-        echo.
-        pause
-        exit /b 1
-    )
+    pause
+    exit /b 1
 )
 echo Ubuntu 22.04 downloaded successfully.
 echo.
