@@ -71,7 +71,7 @@ $bashScriptLines = @(
     '    git pull',
     'else',
     '    cd ~',
-    '    git clone https://github.com/ngviettam82/PX4-Autopilot.git --recursive',
+    '    git clone https://github.com/ngviettam82/PX4-Autopilot.git',
     'fi',
     '',
     'echo "[4/7] Running PX4 dependency installation..."',

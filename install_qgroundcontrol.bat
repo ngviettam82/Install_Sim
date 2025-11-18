@@ -43,7 +43,8 @@ echo.
 REM Run the installer silently
 REM /S = silent mode
 REM /D = installation directory
-"%QGC_INSTALLER%" /S /D="%INSTALL_DIR%"
+REM /NoRestart = don't restart the system
+"%QGC_INSTALLER%" /S /D="%INSTALL_DIR%" /NoRestart >nul 2>&1
 
 if %errorLevel% neq 0 (
     echo ERROR: QGroundControl installation failed!
