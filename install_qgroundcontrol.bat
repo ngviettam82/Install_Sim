@@ -40,11 +40,14 @@ echo Running installer silently...
 echo This may take several minutes...
 echo.
 
-REM Run the installer silently
+REM Run the installer silently and wait for it to complete
 REM /S = silent mode
 REM /D = installation directory
 REM /NoRestart = don't restart the system
-"%QGC_INSTALLER%" /S /D="%INSTALL_DIR%" /NoRestart >nul 2>&1
+REM INSTALLUAVDRIVER=yes makes UAV driver installation automatic
+start /wait "" "%QGC_INSTALLER%" /S /D="%INSTALL_DIR%" /NoRestart /INSTALLUAVDRIVER=yes
+
+timeout /t 5 /nobreak >nul
 
 if %errorLevel% neq 0 (
     echo ERROR: QGroundControl installation failed!
