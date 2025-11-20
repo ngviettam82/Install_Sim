@@ -7,7 +7,7 @@ This folder contains automated installation scripts for setting up a complete PX
 1. **WSL (Windows Subsystem for Linux)** - Ubuntu 22.04
 2. **PX4 Autopilot** - Latest version from GitHub
 3. **PX4 Dependencies** - All required build tools and libraries
-4. **QGroundControl** - Ground control station software
+4. **GroundController-CTUAV** - Ground control station software
 
 ## Quick Start
 
@@ -40,7 +40,7 @@ Run each script in order as **Administrator**:
    build_px4.bat
    ```
 
-4. Install QGroundControl:
+4. Install GroundController-CTUAV:
    ```batch
    install_qgroundcontrol.bat
    ```
@@ -61,7 +61,7 @@ px4s
 
 This is an alias for: `cd ~/PX4-Autopilot && make px4_sitl none_iris`
 
-### Running QGroundControl
+### Running GroundController-CTUAV
 
 From the project root directory:
 ```batch
@@ -76,7 +76,7 @@ qgc.bat
 | `install_wsl.bat` | Installs WSL 2 with Ubuntu 22.04 |
 | `setup_px4_in_wsl.bat` | Clones PX4 and installs dependencies in WSL |
 | `build_px4.bat` | Builds PX4 SITL for the first time |
-| `install_qgroundcontrol.bat` | Downloads and installs QGroundControl |
+| `install_qgroundcontrol.bat` | Installs GroundController-CTUAV |
 | `px4s.bat` | Quick launcher for PX4 SITL |
 
 ## Requirements
@@ -103,12 +103,12 @@ If PX4 build fails:
 3. Run setup again: `bash ./Tools/setup/ubuntu.sh`
 4. Try building: `make px4_sitl none_iris`
 
-### QGroundControl Not Starting
+### GroundController-CTUAV Not Starting
 
-If QGroundControl launcher doesn't work:
-1. Find QGroundControl installation directory
-2. Edit `qgc.bat` with correct path
-3. Run QGroundControl directly from installation folder
+If GroundController-CTUAV launcher doesn't work:
+1. Find GroundController installation directory
+2. Edit `gc.bat` with correct path
+3. Run GroundController-CTUAV directly from installation folder
 
 ## Manual PX4 Commands
 
@@ -134,7 +134,7 @@ git submodule update --init --recursive
 
 PX4 SITL runs on these ports:
 - **UDP 14540**: MAVLink communication
-- **UDP 14550**: QGroundControl default port
+- **UDP 14550**: GroundController-CTUAV default port
 - **TCP 4560**: Simulator connection
 
 Make sure these ports are not blocked by firewall.
@@ -142,7 +142,7 @@ Make sure these ports are not blocked by firewall.
 ## Additional Resources
 
 - [PX4 Documentation](https://docs.px4.io/)
-- [QGroundControl User Guide](https://docs.qgroundcontrol.com/)
+- [GroundController-CTUAV Documentation](https://docs.qgroundcontrol.com/)
 - [WSL Documentation](https://docs.microsoft.com/en-us/windows/wsl/)
 
 ## Support
@@ -158,4 +158,4 @@ If you encounter issues:
 
 - First-time PX4 build can take 10-20 minutes
 - WSL installation may require a system restart
-- QGroundControl can connect automatically to PX4 SITL when both are running
+- GroundController-CTUAV can connect automatically to PX4 SITL when both are running
