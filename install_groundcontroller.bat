@@ -10,12 +10,6 @@ REM Set installation directory
 set "INSTALL_DIR=C:\Program Files\GroundController"
 set "GC_INSTALLER=%~dp0GroundController-installer.exe"
 
-REM Check if GroundController is already installed
-if exist "%INSTALL_DIR%\GroundController.exe" (
-    echo GroundController-CTUAV is already installed at: %INSTALL_DIR%
-    goto :create_launcher
-)
-
 REM Check if installer exists
 if not exist "%GC_INSTALLER%" (
     echo ERROR: GroundController-installer.exe not found!
