@@ -64,7 +64,7 @@ wsl --status >nul 2>&1
 if %errorlevel% equ 0 (
     echo WSL is functional. Proceeding with installation.
     echo.
-    goto InstallUbuntu
+    goto ConfigureUbuntu
 )
 
 echo WSL features have been enabled. Proceeding with WSL installation...

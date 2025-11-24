@@ -1,12 +1,12 @@
 ; PX4 Development Environment Installer
-; NSIS Installer Script
+; NSIS Installer Script - Standalone Automatic Setup
 
 !include "MUI2.nsh"
 !include "x64.nsh"
 
 ; Basic Settings
 Name "PX4 Development Environment Setup"
-OutFile "PX4_Setup.exe"
+OutFile "Setup.exe"
 InstallDir "$PROGRAMFILES\PX4_Development"
 InstallDirRegKey HKCU "Software\PX4_Development" ""
 
@@ -49,14 +49,13 @@ Section "PX4 Development Environment" SecInstall
   
   ; Create Start Menu shortcuts
   CreateDirectory "$SMPROGRAMS\PX4 Development"
-  CreateShortCut "$SMPROGRAMS\PX4 Development\Setup PX4 Environment.lnk" "$INSTDIR\setup_all.bat" "" "$INSTDIR\setup_all.bat" 0
   CreateShortCut "$SMPROGRAMS\PX4 Development\Run PX4 SITL.lnk" "$INSTDIR\px4s.bat" "" "$INSTDIR\px4s.bat" 0
   CreateShortCut "$SMPROGRAMS\PX4 Development\Install GroundController.lnk" "$INSTDIR\install_groundcontroller.bat" "" "$INSTDIR\install_groundcontroller.bat" 0
   CreateShortCut "$SMPROGRAMS\PX4 Development\README.lnk" "$INSTDIR\README.md" "" "$INSTDIR\README.md" 0
   CreateShortCut "$SMPROGRAMS\PX4 Development\Uninstall.lnk" "$INSTDIR\Uninstall.exe" "" "$INSTDIR\Uninstall.exe" 0
   
-  ; Create desktop shortcut for setup
-  CreateShortCut "$DESKTOP\PX4 Setup.lnk" "$INSTDIR\setup_all.bat" "" "$INSTDIR\setup_all.bat" 0
+  ; Create desktop shortcut for running SITL
+  CreateShortCut "$DESKTOP\PX4 SITL.lnk" "$INSTDIR\px4s.bat" "" "$INSTDIR\px4s.bat" 0
   
   ; Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
@@ -103,8 +102,8 @@ SectionEnd
 
 ; Function to run setup after installation
 Function .onInstSuccess
-  ; Optionally launch setup_all.bat after installation
-  ; MessageBox MB_YESNO "Installation complete. Would you like to run the setup now?" IDNO NoSetup
-  ; ExecShell "open" "$INSTDIR\setup_all.bat"
-  ; NoSetup:
+  ; Automatically launch setup_all.bat after installation completes
+  MessageBox MB_YESNO "Installation complete.$\n$\nThe setup wizard will now configure PX4 and install all required components.$\n$\nThis may take some time. Continue?" IDNO NoSetup
+  ExecWait "$INSTDIR\setup_all.bat"
+  NoSetup:
 FunctionEnd

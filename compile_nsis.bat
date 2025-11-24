@@ -12,25 +12,14 @@ echo ========================================
 echo.
 
 REM Try to find NSIS installation
-set NSIS_PATH=
-for /d %%D in ("C:\Program Files*\NSIS") do (
-    set NSIS_PATH=%%D
-)
-
-if "!NSIS_PATH!"=="" (
-    echo ERROR: NSIS is not installed in Program Files!
-    echo.
-    echo Please install NSIS from: https://nsis.sourceforge.io/Download
-    echo Then run this script again.
-    echo.
-    pause
-    exit /b 1
-)
-
+set NSIS_PATH=C:\Program Files (x86)\NSIS
 set MAKENSIS="!NSIS_PATH!\makensis.exe"
 
 if not exist !MAKENSIS! (
-    echo ERROR: makensis.exe not found at: !MAKENSIS!
+    echo ERROR: NSIS is not installed at: !NSIS_PATH!
+    echo.
+    echo Please install NSIS from: https://nsis.sourceforge.io/Download
+    echo Then run this script again.
     echo.
     pause
     exit /b 1
