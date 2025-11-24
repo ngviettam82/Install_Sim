@@ -25,20 +25,11 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-REM Check if WSL is already functional
-echo [Step 1/5] Checking WSL status...
-wsl --status >nul 2>&1
-if %errorlevel% equ 0 (
-    echo WSL is already installed and functional.
-    echo Skipping feature installation.
-    echo.
-    goto InstallUbuntu
-)
-
-echo WSL not detected. Enabling required features...
+echo *** ENABLING WINDOWS SUBSYSTEM FOR LINUX ***
 echo.
 
-echo [Step 2/5] Enabling WSL feature...
+echo [Step 1/5] Enabling WSL feature...
+echo Attempting to enable Microsoft-Windows-Subsystem-Linux feature...
 dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
 set WSL_RESULT=%errorlevel%
 if %WSL_RESULT% equ 0 (
@@ -52,7 +43,8 @@ if %WSL_RESULT% equ 0 (
 )
 echo.
 
-echo [Step 3/5] Enabling Virtual Machine Platform feature...
+echo [Step 2/5] Enabling Virtual Machine Platform feature...
+echo Attempting to enable VirtualMachinePlatform feature...
 dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
 set VM_RESULT=%errorlevel%
 if %VM_RESULT% equ 0 (
@@ -66,70 +58,35 @@ if %VM_RESULT% equ 0 (
 )
 echo.
 
-echo [Step 4/5] Checking if restart is needed...
+echo [Step 3/5] Checking if restart is needed...
 REM Check if WSL command is available after enabling features
 wsl --status >nul 2>&1
 if %errorlevel% equ 0 (
-    echo WSL is functional. No restart needed.
+    echo WSL is functional. Proceeding with installation.
     echo.
     goto InstallUbuntu
 )
 
-echo A system restart is required to complete the feature installation.
-echo.
-set /p RESTART="Do you want to restart now? (Y/N): "
-if /i "%RESTART%"=="Y" (
-    echo Restarting system in 10 seconds...
-    shutdown /r /t 10 /c "Restarting to complete WSL2 installation"
-    exit /b 0
-) else (
-    echo Please restart your computer manually and run this script again.
-    pause
-    exit /b 0
-)
-
-:InstallUbuntu
-echo Setting WSL 2 as the default version...
-wsl --set-default-version 2
-if %errorlevel% neq 0 (
-    echo WARNING: Failed to set WSL 2 as default. You may need to update the WSL 2 kernel.
-    echo Downloading WSL 2 kernel update...
-    echo Please download and install from: https://aka.ms/wsl2kernel
-    echo.
-    echo After installing the kernel update, run this command:
-    echo wsl --set-default-version 2
-    echo.
-)
+echo WSL features have been enabled. Proceeding with WSL installation...
 echo.
 
-echo Checking if Ubuntu 22.04 is already installed...
-wsl -d Ubuntu-22.04 --status >nul 2>&1
-if %errorlevel% equ 0 (
-    echo Ubuntu 22.04 is already installed.
-    echo Verifying configuration...
-    goto ConfigureUbuntu
-)
-
-echo Installing Ubuntu 22.04...
+:InstallWSL
+echo [Step 4/5] Installing WSL2...
+echo Attempting to install WSL2 with Ubuntu 22.04...
 wsl --install -d Ubuntu-22.04 --no-launch
 if %errorlevel% neq 0 (
-    echo ERROR: Failed to install Ubuntu 22.04.
+    echo ERROR: Failed to install WSL2 and Ubuntu 22.04.
     echo.
-    echo Troubleshooting tips:
-    echo 1. Make sure you have restarted after enabling WSL features
-    echo 2. Ensure you have an internet connection
-    echo 3. Try running: wsl --update
+    echo Please restart your computer and run this script again.
     echo.
     pause
     exit /b 1
 )
-echo Ubuntu 22.04 downloaded successfully.
+echo WSL2 and Ubuntu 22.04 installed successfully.
 echo.
 
-echo Waiting for installation to complete...
-timeout /t 3 /nobreak >nul
-
 :ConfigureUbuntu
+echo [Step 5/5] Configuring Ubuntu user...
 echo Checking if user 'ubuntu' already exists...
 wsl -d Ubuntu-22.04 -u root id ubuntu >nul 2>&1
 if %errorlevel% equ 0 (
@@ -150,6 +107,8 @@ wsl -d Ubuntu-22.04 -u root bash -c "useradd -m -s /bin/bash ubuntu; echo 'ubunt
 
 if %errorlevel% neq 0 (
     echo ERROR: Failed to create user with alternative method.
+    echo Please restart your computer manually and run this script again.
+    echo.
     pause
     exit /b 1
 )
