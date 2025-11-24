@@ -57,7 +57,7 @@ echo.
 
 echo.
 echo [4/5] Installing GroundController-CTUAV...
-call "%~dp0install_qgroundcontrol.bat" auto
+call "%~dp0install_groundcontroller.bat" auto
 if %errorLevel% neq 0 (
     echo ERROR: GroundController-CTUAV installation failed!
     pause
