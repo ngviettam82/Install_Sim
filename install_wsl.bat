@@ -106,28 +106,36 @@ echo.
 echo [Step 4/4] Installing Ubuntu 22.04...
 
 
-REM Check for wsl.exe - handle WOW64 redirection for 32-bit installers on 64-bit Windows
-REM On 64-bit Windows, 32-bit processes see SysWOW64 when accessing System32
-REM Use PowerShell to check actual file existence without redirection
+REM Check for wsl.exe - With 64-bit installer, System32 path works directly
 set WSL_FOUND=0
 set WSL_PATH=
 
-REM Use PowerShell to check real System32 path (bypasses WOW64 redirection)
+REM Check System32 first (works with 64-bit installer)
 echo Checking for WSL executable...
-for /f "tokens=*" %%a in ('powershell -NoProfile -Command "if (Test-Path 'C:\Windows\System32\wsl.exe') { Write-Output 'C:\Windows\System32\wsl.exe' } elseif (Test-Path 'C:\Windows\Sysnative\wsl.exe') { Write-Output 'C:\Windows\Sysnative\wsl.exe' } else { Write-Output 'NOT_FOUND' }"') do set WSL_CHECK=%%a
-
-if not "%WSL_CHECK%"=="NOT_FOUND" (
-    set WSL_PATH=%WSL_CHECK%
+if exist "C:\Windows\System32\wsl.exe" (
+    set WSL_PATH=C:\Windows\System32\wsl.exe
     set WSL_FOUND=1
-    echo Found WSL at: %WSL_CHECK%
+    echo Found WSL at System32 path
+    goto WSLFound
+)
+
+REM Fallback: Check Sysnative (for 32-bit process on 64-bit Windows)
+if exist "C:\Windows\Sysnative\wsl.exe" (
+    set WSL_PATH=C:\Windows\Sysnative\wsl.exe
+    set WSL_FOUND=1
+    echo Found WSL at Sysnative path
     goto WSLFound
 )
 
 REM Retry loop if not found immediately
 for /l %%i in (1,1,15) do (
-    for /f "tokens=*" %%a in ('powershell -NoProfile -Command "if (Test-Path 'C:\Windows\System32\wsl.exe') { Write-Output 'C:\Windows\System32\wsl.exe' } elseif (Test-Path 'C:\Windows\Sysnative\wsl.exe') { Write-Output 'C:\Windows\Sysnative\wsl.exe' } else { Write-Output 'NOT_FOUND' }"') do set WSL_CHECK=%%a
-    if not "!WSL_CHECK!"=="NOT_FOUND" (
-        set WSL_PATH=!WSL_CHECK!
+    if exist "C:\Windows\System32\wsl.exe" (
+        set WSL_PATH=C:\Windows\System32\wsl.exe
+        set WSL_FOUND=1
+        goto WSLFound
+    )
+    if exist "C:\Windows\Sysnative\wsl.exe" (
+        set WSL_PATH=C:\Windows\Sysnative\wsl.exe
         set WSL_FOUND=1
         goto WSLFound
     )
@@ -209,7 +217,7 @@ echo WSL Installation Complete!
 echo ============================================================================
 echo.
 echo Ubuntu 22.04 is now installed and configured with:
-echo   - Default user: root
+echo   - Default user: ubuntu (no password)
 echo   - Default WSL version: 2
 echo.
 echo You can launch Ubuntu by typing: wsl
