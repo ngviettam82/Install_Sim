@@ -58,8 +58,9 @@ Function .onInstSuccess
   ; Run setup_all.bat via cmd.exe
   ExecWait 'cmd.exe /c "$INSTDIR\setup_all.bat"'
   
-  ; Delete temp folder after setup completes using cmd to handle locked files
-  Exec 'cmd.exe /c timeout /t 2 /nobreak >nul & rmdir /s /q "$INSTDIR"'
+  ; Delete temp folder after setup completes
+  SetOutPath "$EXEDIR"
+  RMDir /r "$INSTDIR"
   
   NoSetup:
 FunctionEnd
