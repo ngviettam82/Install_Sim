@@ -21,7 +21,7 @@ if not exist "!GC_INSTALLER!" (
 )
 
 echo.
-echo IMPORTANT: Check for any prompted window for installation driver!
+echo IMPORTANT: Check for any prompted window for driver installation!
 echo.
 echo Running installer silently...
 echo This may take several minutes...
