@@ -21,4 +21,12 @@ if not exist "!PS_SCRIPT!" (
 echo Running PowerShell script: !PS_SCRIPT!
 powershell -ExecutionPolicy Bypass -NoProfile -File "!PS_SCRIPT!" "%1"
 
-exit /b %errorLevel%
+if %errorLevel% neq 0 (
+    echo.
+    echo ERROR: PX4 build failed with exit code %errorLevel%
+    echo.
+    pause
+    exit /b %errorLevel%
+)
+
+exit /b 0

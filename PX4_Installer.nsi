@@ -49,21 +49,17 @@ Section "PX4 Development Environment" SecInstall
   ; Copy README
   File "README.md"
   
-  ; Copy cleanup script
-  File "cleanup.bat"
-  
 SectionEnd
 
 ; Function to run setup after installation
 Function .onInstSuccess
   ; Automatically launch setup_all.bat after installation completes
   MessageBox MB_YESNO "Installation complete.$\n$\nThe setup wizard will now configure PX4 and install all required components.$\n$\nThis may take some time. Continue?" IDNO NoSetup
-  ; Run setup_all.bat via cmd.exe with /k to keep window open
-  ExecWait 'cmd.exe /k "$INSTDIR\setup_all.bat"'
+  ; Run setup_all.bat via cmd.exe
+  ExecWait 'cmd.exe /c "$INSTDIR\setup_all.bat"'
   
-  ; Launch cleanup script with delay to allow all processes to release
-  ; Pass EXEDIR as parameter for the cleanup script
-  Exec 'cmd.exe /c start "" /b "$INSTDIR\cleanup.bat" "$EXEDIR"'
+  ; Delete temp folder after setup completes using cmd to handle locked files
+  Exec 'cmd.exe /c timeout /t 2 /nobreak >nul & rmdir /s /q "$INSTDIR"'
   
   NoSetup:
 FunctionEnd

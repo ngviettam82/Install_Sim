@@ -9,6 +9,9 @@ REM 3. Build PX4 SITL
 REM 4. Install GroundController-CTUAV
 REM ========================================
 
+REM Disable Quick Edit mode for current console to prevent click-pause issue
+powershell -NoProfile -Command "$code = '[DllImport(\"kernel32.dll\", SetLastError=true)] public static extern IntPtr GetStdHandle(int h); [DllImport(\"kernel32.dll\", SetLastError=true)] public static extern bool GetConsoleMode(IntPtr h, out uint m); [DllImport(\"kernel32.dll\", SetLastError=true)] public static extern bool SetConsoleMode(IntPtr h, uint m);'; $t = Add-Type -MemberDefinition $code -Name 'W' -Namespace 'C' -PassThru; $h = $t::GetStdHandle(-10); $m = 0; $null = $t::GetConsoleMode($h, [ref]$m); $null = $t::SetConsoleMode($h, $m -band (-bnot 0x0040))" >nul 2>&1
+
 echo ========================================
 echo PX4 Development Environment Setup
 echo ========================================
@@ -82,5 +85,6 @@ echo ========================================
 echo Setup Complete!
 echo ========================================
 echo.
-pause
+echo Press any key to close this window...
+pause >nul
 exit /b 0

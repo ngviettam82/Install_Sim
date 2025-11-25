@@ -58,11 +58,11 @@ $bashScriptLines = @(
     'echo ""',
     '',
     'echo "[1/7] Updating system packages..."',
-    'sudo apt-get update -y',
-    'sudo apt-get upgrade -y',
+    'apt-get update -y',
+    'apt-get upgrade -y',
     '',
     'echo "[2/7] Installing essential tools..."',
-    'sudo apt-get install -y git wget curl build-essential cmake ninja-build python3-pip python3-dev',
+    'apt-get install -y git wget curl build-essential cmake ninja-build python3-pip python3-dev',
     '',
     'echo "[3/7] Cloning/Updating PX4-Autopilot repository..."',
     'if [ -d ~/PX4-Autopilot ]; then',
@@ -79,7 +79,7 @@ $bashScriptLines = @(
     'bash ./Tools/setup/ubuntu.sh --no-nuttx --no-sim-tools',
     '',
     'echo "[5/7] Installing Python dependencies..."',
-    'pip3 install --user -r Tools/setup/requirements.txt',
+    'pip3 install -r Tools/setup/requirements.txt',
     '',
     'echo "[6/7] Setting up px4s alias..."',
     'if ! grep -q "alias px4s=" ~/.bashrc; then',
@@ -126,7 +126,7 @@ $scriptBytes = [System.Text.Encoding]::UTF8.GetBytes($scriptContent)
 $scriptB64 = [System.Convert]::ToBase64String($scriptBytes)
 
 # Execute via WSL using base64 decoding to preserve exact byte content
-wsl -d Ubuntu-22.04 -u ubuntu bash -c "echo '$scriptB64' | base64 -d | bash"
+wsl -d Ubuntu-22.04 -u root bash -c "echo '$scriptB64' | base64 -d | bash"
 
 $setupResult = $LASTEXITCODE
 

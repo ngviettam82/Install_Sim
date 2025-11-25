@@ -53,7 +53,7 @@ $scriptBytes = [System.Text.Encoding]::UTF8.GetBytes($scriptContent)
 $scriptB64 = [System.Convert]::ToBase64String($scriptBytes)
 
 # Execute via WSL using base64 decoding to preserve exact byte content
-wsl -d Ubuntu-22.04 -u ubuntu bash -c "echo '$scriptB64' | base64 -d | bash"
+wsl -d Ubuntu-22.04 -u root bash -c "echo '$scriptB64' | base64 -d | bash"
 
 $buildResult = $LASTEXITCODE
 
@@ -68,8 +68,9 @@ if ($buildResult -ne 0) {
     Write-Host "Troubleshooting:" -ForegroundColor Yellow
     Write-Host "1. Make sure you ran setup_px4_in_wsl.bat first" -ForegroundColor Yellow
     Write-Host "2. Check available disk space (PX4 build requires ~2GB)" -ForegroundColor Yellow
-    Write-Host "3. Try cleaning and rebuilding: wsl -d Ubuntu-22.04 -u ubuntu bash -c 'cd ~/PX4-Autopilot && make clean'" -ForegroundColor Yellow
+    Write-Host "3. Try cleaning and rebuilding: wsl -d Ubuntu-22.04 -u root bash -c 'cd ~/PX4-Autopilot && make clean'" -ForegroundColor Yellow
     Write-Host ""
+    Write-Host "Press any key to continue..." -ForegroundColor Yellow
     pause
     exit 1
 } else {
