@@ -44,8 +44,8 @@ echo ========================================
 echo NSIS Installer compiled successfully!
 echo ========================================
 echo.
-echo Output file: PX4_Setup.exe
-echo Location: %cd%\PX4_Setup.exe
+echo Output file: Setup.exe
+echo Location: %cd%\Setup.exe
 echo.
 echo The installer is ready to distribute!
 echo.
