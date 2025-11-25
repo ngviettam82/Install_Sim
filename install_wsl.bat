@@ -58,41 +58,165 @@ if %VM_RESULT% equ 0 (
 )
 echo.
 
-echo [Step 3/5] Checking if restart is needed...
-REM Check if WSL command is available after enabling features
-wsl --status >nul 2>&1
-if %errorlevel% equ 0 (
-    echo WSL is functional. Proceeding with installation.
-    echo.
-    goto ConfigureUbuntu
+echo [Step 3/5] Installing WSL2 MSI package...
+echo Downloading WSL2 MSI from GitHub...
+
+REM Create a temporary directory for downloads
+set TEMP_DIR=%TEMP%\WSL_Install_%RANDOM%
+mkdir "%TEMP_DIR%" 2>nul
+
+REM Check system architecture
+for /f "tokens=2 delims==" %%A in ('wmic os get osarchitecture /value ^| find "="') do set ARCH=%%A
+echo Detected architecture: %ARCH%
+
+REM Download the appropriate WSL2 MSI
+if "%ARCH%"=="64-bit" (
+    echo Downloading WSL2 Linux kernel update for x64...
+    powershell -Command "& {$ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri 'https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi' -OutFile '%TEMP_DIR%\wsl_update.msi' -UseBasicParsing}" 2>nul
+) else if "%ARCH%"=="ARM64" (
+    echo Downloading WSL2 Linux kernel update for ARM64...
+    powershell -Command "& {$ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri 'https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_arm64.msi' -OutFile '%TEMP_DIR%\wsl_update.msi' -UseBasicParsing}" 2>nul
+) else (
+    echo WARNING: Unable to detect architecture. Attempting x64 download...
+    powershell -Command "& {$ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri 'https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi' -OutFile '%TEMP_DIR%\wsl_update.msi' -UseBasicParsing}" 2>nul
 )
 
-echo WSL features have been enabled. Proceeding with WSL installation...
+if exist "%TEMP_DIR%\wsl_update.msi" (
+    echo Installing WSL2 Linux kernel update...
+    echo This may take a few moments...
+    msiexec /i "%TEMP_DIR%\wsl_update.msi" /quiet /norestart
+    if %errorlevel% equ 0 (
+        echo WSL2 kernel package installed successfully.
+    ) else (
+        echo WARNING: WSL2 kernel installation returned code %errorlevel%. Continuing...
+    )
+) else (
+    echo WARNING: Failed to download WSL2 kernel package. Continuing anyway...
+)
+
+REM Clean up temp directory
+rmdir /s /q "%TEMP_DIR%" 2>nul
+
+REM After MSI install, the wsl command should be available but may need time to register
+echo Waiting for WSL command to become available...
+timeout /t 8 /nobreak >nul
 echo.
 
-:InstallWSL
-echo [Step 4/5] Installing WSL2...
-echo Attempting to install WSL2 with Ubuntu 22.04...
-wsl --install -d Ubuntu-22.04 --no-launch
-if %errorlevel% neq 0 (
-    echo ERROR: Failed to install WSL2 and Ubuntu 22.04.
-    echo.
-    echo Please restart your computer and run this script again.
-    echo.
-    pause
-    exit /b 1
+echo [Step 4/5] Installing Ubuntu 22.04...
+echo Checking if wsl.exe is available...
+timeout /t 3 /nobreak >nul
+
+REM Check for wsl.exe - handle WOW64 redirection for 32-bit installers on 64-bit Windows
+REM On 64-bit Windows, 32-bit processes see SysWOW64 when accessing System32
+REM Use Sysnative to access the real 64-bit System32 folder
+set WSL_FOUND=0
+set WSL_PATH=
+
+REM First priority: Check Sysnative (for 32-bit process on 64-bit Windows)
+REM This path only exists when running as 32-bit process on 64-bit Windows
+if exist "C:\Windows\Sysnative\wsl.exe" (
+    set WSL_PATH=C:\Windows\Sysnative\wsl.exe
+    set WSL_FOUND=1
+    echo Found WSL at Sysnative path (32-bit process on 64-bit Windows)
+    goto WSLFound
 )
-echo WSL2 and Ubuntu 22.04 installed successfully.
+
+REM Second priority: Check native System32 (for 64-bit process or 32-bit Windows)
+if exist "C:\Windows\System32\wsl.exe" (
+    set WSL_PATH=C:\Windows\System32\wsl.exe
+    set WSL_FOUND=1
+    echo Found WSL at System32 path
+    goto WSLFound
+)
+
+REM Third priority: Wait and retry both paths
+for /l %%i in (1,1,15) do (
+    if exist "C:\Windows\Sysnative\wsl.exe" (
+        set WSL_PATH=C:\Windows\Sysnative\wsl.exe
+        set WSL_FOUND=1
+        goto WSLFound
+    )
+    if exist "C:\Windows\System32\wsl.exe" (
+        set WSL_PATH=C:\Windows\System32\wsl.exe
+        set WSL_FOUND=1
+        goto WSLFound
+    )
+    echo Attempt %%i/15: WSL not found yet. Waiting...
+    timeout /t 2 /nobreak >nul
+)
+
+:WSLFound
+if %WSL_FOUND% equ 1 (
+    echo WSL found at: %WSL_PATH%
+    echo Installing Ubuntu 22.04...
+    echo Running: "%WSL_PATH%" --install -d Ubuntu-22.04 --no-launch
+    "%WSL_PATH%" --install -d Ubuntu-22.04 --no-launch
+    if %errorlevel% equ 0 (
+        echo Ubuntu 22.04 installation completed successfully.
+    ) else (
+        echo WARNING: Ubuntu install returned code %errorlevel%. Continuing...
+    )
+) else (
+    echo INFO: WSL executable not found at expected locations.
+    echo The WSL MSI may not have installed properly, or a system restart is required.
+    echo.
+    echo Checked locations:
+    echo - C:\Windows\System32\wsl.exe
+    echo - C:\Program Files\WSL\wsl.exe
+    echo.
+    set /p RESTART_INPUT="Press Y and Enter to restart now, or N to restart manually later: "
+    if /i "%RESTART_INPUT%"=="Y" (
+        echo.
+        echo Restarting system in 10 seconds...
+        timeout /t 10 /nobreak
+        shutdown /r /t 0 /c "Restarting to complete WSL2 kernel installation"
+        exit /b 0
+    ) else (
+        echo.
+        echo Please restart your computer manually and run this script again.
+        echo.
+        pause
+        exit /b 0
+    )
+)
+timeout /t 3 /nobreak >nul
 echo.
 
 :ConfigureUbuntu
 echo [Step 5/5] Configuring Ubuntu user...
+echo Waiting for WSL to be fully initialized...
+timeout /t 8 /nobreak >nul
+
+REM Ensure WSL_PATH is set - find it if not already found (handle WOW64 redirection)
+if not defined WSL_PATH (
+    if exist "C:\Windows\Sysnative\wsl.exe" (
+        set WSL_PATH=C:\Windows\Sysnative\wsl.exe
+    ) else if exist "C:\Windows\System32\wsl.exe" (
+        set WSL_PATH=C:\Windows\System32\wsl.exe
+    )
+)
+
+REM Try to verify Ubuntu is installed and available using full path
+"%WSL_PATH%" -l --quiet 2>nul | findstr /I "Ubuntu-22.04" >nul 2>&1
+if %errorlevel% neq 0 (
+    echo INFO: Ubuntu 22.04 not yet fully initialized.
+    echo This may require another restart to complete.
+    echo.
+    echo After restart, run this script again to configure the Ubuntu user.
+    echo.
+    pause
+    exit /b 0
+)
+
+echo Ubuntu 22.04 is installed. Proceeding with user configuration...
+timeout /t 3 /nobreak >nul
+
 echo Checking if user 'ubuntu' already exists...
-wsl -d Ubuntu-22.04 -u root id ubuntu >nul 2>&1
+"%WSL_PATH%" -d Ubuntu-22.04 -u root id ubuntu >nul 2>&1
 if %errorlevel% equ 0 (
     echo User 'ubuntu' already exists. Skipping user creation.
     echo Ensuring passwordless sudo is enabled...
-    wsl -d Ubuntu-22.04 -u root bash -c "echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/ubuntu; chmod 0440 /etc/sudoers.d/ubuntu"
+    "%WSL_PATH%" -d Ubuntu-22.04 -u root bash -c "echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/ubuntu; chmod 0440 /etc/sudoers.d/ubuntu"
     goto SetDefaultUser
 )
 
@@ -102,8 +226,8 @@ REM Use ubuntu2204 install with root user first
 ubuntu2204.exe install --root
 timeout /t 2 /nobreak >nul
 
-REM Create ubuntu user and configure sudo
-wsl -d Ubuntu-22.04 -u root bash -c "useradd -m -s /bin/bash ubuntu; echo 'ubuntu: ' | chpasswd; usermod -aG sudo ubuntu; echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/ubuntu; chmod 0440 /etc/sudoers.d/ubuntu"
+REM Create ubuntu user and configure sudo using full path
+"%WSL_PATH%" -d Ubuntu-22.04 -u root bash -c "useradd -m -s /bin/bash ubuntu; echo 'ubuntu: ' | chpasswd; usermod -aG sudo ubuntu; echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/ubuntu; chmod 0440 /etc/sudoers.d/ubuntu"
 
 if %errorlevel% neq 0 (
     echo ERROR: Failed to create user with alternative method.
@@ -119,13 +243,13 @@ REM Set default user for Ubuntu
 ubuntu2204.exe config --default-user ubuntu
 if %errorlevel% neq 0 (
     echo WARNING: Failed to set default user. Trying to configure...
-    wsl -d Ubuntu-22.04 -u root bash -c "echo '[user]' > /etc/wsl.conf; echo 'default=ubuntu' >> /etc/wsl.conf"
-    wsl --terminate Ubuntu-22.04
+    "%WSL_PATH%" -d Ubuntu-22.04 -u root bash -c "echo '[user]' > /etc/wsl.conf; echo 'default=ubuntu' >> /etc/wsl.conf"
+    "%WSL_PATH%" --terminate Ubuntu-22.04
     timeout /t 2 /nobreak >nul
 )
 
 echo Setting Ubuntu-22.04 as default WSL distribution...
-wsl --set-default Ubuntu-22.04
+"%WSL_PATH%" --set-default Ubuntu-22.04
 if %errorlevel% equ 0 (
     echo Ubuntu-22.04 is now set as the default WSL distribution.
 ) else (

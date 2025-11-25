@@ -104,6 +104,9 @@ SectionEnd
 Function .onInstSuccess
   ; Automatically launch setup_all.bat after installation completes
   MessageBox MB_YESNO "Installation complete.$\n$\nThe setup wizard will now configure PX4 and install all required components.$\n$\nThis may take some time. Continue?" IDNO NoSetup
-  ExecWait "$INSTDIR\setup_all.bat"
+  ; Run in a new cmd.exe process with proper System32 access
+  ; The /k keeps the window open, /c would close after execution
+  SetOutPath "$INSTDIR"
+  ExecWait '"$SYSDIR\cmd.exe" /c "$INSTDIR\setup_all.bat"'
   NoSetup:
 FunctionEnd
