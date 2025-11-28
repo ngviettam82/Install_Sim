@@ -85,6 +85,4 @@ echo ========================================
 echo Setup Complete!
 echo ========================================
 echo.
-echo Press any key to close this window...
-pause >nul
 exit /b 0
