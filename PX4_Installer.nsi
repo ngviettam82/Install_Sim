@@ -57,13 +57,29 @@ Function .onInstSuccess
   ; Automatically launch setup_all.bat after installation completes
   MessageBox MB_YESNO "Installation complete.$\n$\nThe setup wizard will now configure PX4 and install all required components.$\n$\nThis may take some time. Continue?" IDNO NoSetup
   
+  ; Temporarily disable Quick Edit for consoles created during setup so accidental clicks do not pause execution
+  ReadRegDWORD $0 HKCU "Console" "QuickEdit"
+  StrCpy $1 1
+  IfErrors 0 +2
+    StrCpy $1 0
+  WriteRegDWORD HKCU "Console" "QuickEdit" 0
+  
   ; Use Sysnative to run 64-bit cmd.exe from 32-bit installer
   ; This ensures wsl.exe in System32 is accessible
-  IfFileExists "$WINDIR\Sysnative\cmd.exe" 0 +3
+  IfFileExists "$WINDIR\Sysnative\cmd.exe" 0 +4
     ExecWait '"$WINDIR\Sysnative\cmd.exe" /c "$INSTDIR\setup_all.bat"'
-    Goto DoneSetup
+    Goto RestoreQuickEdit
   ; Fallback to regular cmd if Sysnative doesn't exist (already 64-bit)
   ExecWait 'cmd.exe /c "$INSTDIR\setup_all.bat"'
+  
+  RestoreQuickEdit:
+  
+  ; Restore original Quick Edit registry state
+  StrCmp $1 0 0 +3
+    DeleteRegValue HKCU "Console" "QuickEdit"
+    Goto DoneQuickEditRestore
+  WriteRegDWORD HKCU "Console" "QuickEdit" $0
+  DoneQuickEditRestore:
   
   DoneSetup:
   ; Delete temp folder after setup completes
