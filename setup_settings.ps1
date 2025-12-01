@@ -20,22 +20,42 @@ if ([string]::IsNullOrEmpty($scriptDir)) {
     $scriptDir = Split-Path -Parent $MyInvocation.MyCommandPath
 }
 $projectDir = Split-Path -Parent $scriptDir
-$mapsFolder = Join-Path $projectDir "Maps"
-$tutorialMapsFolder = Join-Path $projectDir "Tutorial Maps"
+
+# New folder structure: resources/maps/prod and resources/maps/tutorials
+$resourceMapsDir = Join-Path $projectDir "resources" "maps"
+$mapsFolder = Join-Path $resourceMapsDir "prod"
+$tutorialMapsFolder = Join-Path $resourceMapsDir "tutorials"
+
+# Legacy folder structure fallback: Maps and Tutorial Maps
+$legacyMapsFolder = Join-Path $projectDir "Maps"
+$legacyTutorialMapsFolder = Join-Path $projectDir "Tutorial Maps"
 
 Write-Host "[*] Project Directory: $projectDir" -ForegroundColor Yellow
-Write-Host "[*] Maps Directory: $mapsFolder" -ForegroundColor Yellow
-Write-Host "[*] Tutorial Maps Directory: $tutorialMapsFolder" -ForegroundColor Yellow
-Write-Host ""
 
-# Check if at least one folder exists
-if ((-not (Test-Path $mapsFolder)) -and (-not (Test-Path $tutorialMapsFolder))) {
-    Write-Host "ERROR: Neither Maps nor Tutorial Maps folder found!" -ForegroundColor Red
+# Determine which folder structure to use
+$usingNewStructure = (Test-Path $mapsFolder) -or (Test-Path $tutorialMapsFolder)
+$usingLegacyStructure = (Test-Path $legacyMapsFolder) -or (Test-Path $legacyTutorialMapsFolder)
+
+if ($usingNewStructure) {
+    Write-Host "[*] Using new folder structure" -ForegroundColor Green
+    Write-Host "[*] Maps Directory: $mapsFolder" -ForegroundColor Yellow
+    Write-Host "[*] Tutorial Maps Directory: $tutorialMapsFolder" -ForegroundColor Yellow
+} elseif ($usingLegacyStructure) {
+    Write-Host "[*] Using legacy folder structure" -ForegroundColor Yellow
+    $mapsFolder = $legacyMapsFolder
+    $tutorialMapsFolder = $legacyTutorialMapsFolder
+    Write-Host "[*] Maps Directory: $mapsFolder" -ForegroundColor Yellow
+    Write-Host "[*] Tutorial Maps Directory: $tutorialMapsFolder" -ForegroundColor Yellow
+} else {
+    Write-Host "ERROR: No Maps folders found!" -ForegroundColor Red
+    Write-Host "Expected new structure: $mapsFolder" -ForegroundColor Red
+    Write-Host "Or legacy structure: $legacyMapsFolder" -ForegroundColor Red
     if ($Parameter -eq "") {
         pause
     }
     exit 1
 }
+Write-Host ""
 
 # Get WSL IP address using the same method as setup_px4_in_wsl.ps1
 Write-Host "[*] Detecting WSL IP address..." -ForegroundColor Yellow
