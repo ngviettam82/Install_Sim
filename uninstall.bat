@@ -50,8 +50,6 @@ echo.
 echo ========================================
 echo Uninstallation Complete!
 echo ========================================
-echo.
-echo Press any key to close...
-pause >nul
+
 
 exit /b 0
