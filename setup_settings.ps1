@@ -22,7 +22,9 @@ if ([string]::IsNullOrEmpty($scriptDir)) {
 $projectDir = Split-Path -Parent $scriptDir
 
 # New folder structure: resources/maps/prod and resources/maps/tutorials
-$resourceMapsDir = Join-Path $projectDir "resources" "maps"
+# Use nested Join-Path for PowerShell 5.1 compatibility (doesn't support 3+ args)
+$resourcesDir = Join-Path $projectDir "resources"
+$resourceMapsDir = Join-Path $resourcesDir "maps"
 $mapsFolder = Join-Path $resourceMapsDir "prod"
 $tutorialMapsFolder = Join-Path $resourceMapsDir "tutorials"
 
