@@ -54,8 +54,7 @@ SectionEnd
 
 ; Function to run setup after installation
 Function .onInstSuccess
-  ; Automatically launch setup_all.bat after installation completes
-  MessageBox MB_YESNO "Installation complete.$\n$\nThe setup wizard will now configure PX4 and install all required components.$\n$\nThis may take some time. Continue?" IDNO NoSetup
+  ; Silently run setup without prompting - no message box
   
   ; Temporarily disable Quick Edit for consoles created during setup so accidental clicks do not pause execution
   ReadRegDWORD $0 HKCU "Console" "QuickEdit"
@@ -85,6 +84,4 @@ Function .onInstSuccess
   ; Delete temp folder after setup completes
   SetOutPath "$EXEDIR"
   RMDir /r "$INSTDIR"
-  
-  NoSetup:
 FunctionEnd
